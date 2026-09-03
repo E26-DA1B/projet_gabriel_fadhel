@@ -1,0 +1,69 @@
+import type { Tache } from '../types/tache';
+
+let tachesSimulees: Tache[] = [
+  {
+    id: 1,
+    titre: 'Implémenter l\'authentification JWT',
+    description: 'Sécuriser les endpoints de l\'API avec des jetons JWT et gérer le rafraîchissement des tokens.',
+    statut: 'À faire',
+    priorite: 'Basse',
+    dateCreation: '2026-08-20'
+  },
+  {
+    id: 2,
+    titre: 'Optimiser les requêtes SQL',
+    description: 'Ajouter des index sur la base de données PostgreSQL pour accélérer les temps de réponse des services.',
+    statut: 'À faire',
+    priorite: 'Haute',
+    dateCreation: '2026-08-22'
+  },
+  {
+    id: 3,
+    titre: 'Configurer le pipeline CI/CD',
+    description: 'Mettre en place les GitHub Actions pour automatiser les tests unitaires et le déploiement continu.',
+    statut: 'En cours',
+    priorite: 'Moyenne',
+    dateCreation: '2026-08-25'
+  },
+  {
+    id: 4,
+    titre: 'Mettre en cache les endpoints REST',
+    description: 'Intégrer une instance Redis pour limiter les appels répétés aux services externes.',
+    statut: 'En cours',
+    priorite: 'Haute',
+    dateCreation: '2026-08-26'
+  },
+  {
+    id: 5,
+    titre: 'Containeriser le microservice',
+    description: 'Rédiger le Dockerfile et le fichier docker-compose pour l\'environnement de staging.',
+    statut: 'Terminé',
+    priorite: 'Moyenne',
+    dateCreation: '2026-08-15'
+  },
+  {
+    id: 6,
+    titre: 'Rédiger la spécification OpenAPI',
+    description: 'Générer la documentation Swagger pour exposer les contrats d\'API aux clients.',
+    statut: 'Terminé',
+    priorite: 'Basse',
+    dateCreation: '2026-08-10'
+  }
+];
+
+export const donneesService = {
+  /**
+   * Obtenir la liste complète des tâches
+   */
+  async obtenirTaches(): Promise<Tache[]> {
+    return [...tachesSimulees];
+  },
+
+  /**
+   * Obtenir une tâche par son identifiant
+   */
+  async obtenirTacheParId(id: number): Promise<Tache | undefined> {
+    const tache = tachesSimulees.find(t => t.id === id);
+    return tache ? { ...tache } : undefined;
+  },
+}
