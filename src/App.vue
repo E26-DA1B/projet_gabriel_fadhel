@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { RouterView } from 'vue-router';
 import NavigationPrincipale from './components/NavigationPrincipale.vue';
 </script>
 
