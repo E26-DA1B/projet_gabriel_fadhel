@@ -1,4 +1,4 @@
-import type { Tache } from '../types/tache';
+import type { Tache, DonneesFormulaireTache } from '../types/tache';
 
 let tachesSimulees: Tache[] = [
   {
@@ -52,18 +52,60 @@ let tachesSimulees: Tache[] = [
 ];
 
 export const donneesService = {
-  /**
-   * Obtenir la liste complète des tâches
-   */
+
   async obtenirTaches(): Promise<Tache[]> {
     return [...tachesSimulees];
   },
 
-  /**
-   * Obtenir une tâche par son identifiant
-   */
   async obtenirTacheParId(id: number): Promise<Tache | undefined> {
     const tache = tachesSimulees.find(t => t.id === id);
     return tache ? { ...tache } : undefined;
   },
+
+  async ajouterTache(donnees: DonneesFormulaireTache): Promise<Tache> {
+    const nouveauId = tachesSimulees.length > 0 
+      ? Math.max(...tachesSimulees.map(t => t.id)) + 1 
+      : 1;
+
+    const nouvelleTache: Tache = {
+      id: nouveauId,
+      titre: donnees.titre,
+      description: donnees.description || '',
+      statut: 'À faire',
+      priorite: donnees.priorite || 'Moyenne',
+      dateCreation: new Date().toISOString().split('T')[0]
+    };
+
+    tachesSimulees.push(nouvelleTache);
+    return { ...nouvelleTache };
+  },
+
+  async changerStatut(id: number, nouveauStatut: string): Promise<boolean> {
+    const tache = tachesSimulees.find(t => t.id === id);
+    if (!tache) return false;
+
+    tache.statut = nouveauStatut;
+    return true;
+  },
+
+  async supprimerTache(id: number): Promise<boolean> {
+    const longueurInitiale = tachesSimulees.length;
+    tachesSimulees = tachesSimulees.filter(t => t.id !== id);
+    return tachesSimulees.length < longueurInitiale;
+  },
+
+  async obtenirResume() {
+    const total = tachesSimulees.length;
+    const aFaire = tachesSimulees.filter(t => t.statut === 'À faire').length;
+    const enCours = tachesSimulees.filter(t => t.statut === 'En cours').length;
+    const termine = tachesSimulees.filter(t => t.statut === 'Terminé').length;
+
+    return {
+      total,
+      aFaire,
+      enCours,
+      termine,
+      tauxCompletion: total > 0 ? Math.round((termine / total) * 100) : 0
+    };
+  }
 }
