@@ -6,3 +6,5 @@ export interface Tache {
   priorite: string;
   dateCreation: string;
 }
+
+export type DonneesFormulaireTache = Omit<Tache, 'id' | 'statut' | 'dateCreation'>;
