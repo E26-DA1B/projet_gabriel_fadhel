@@ -127,3 +127,98 @@ body {
   font-size: 1.05rem;
   padding: 0.8rem 1.8rem;
 }
+
+/* ==========================================
+   Détails tâche
+   ========================================== */
+.detail-container {
+  max-width: 650px;
+  margin: 1rem auto 0 auto;
+}
+ 
+.view-card {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.04);
+  overflow: hidden;
+}
+ 
+.view-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.25rem 1.75rem;
+  background-color: var(--bg-color);
+  border-bottom: 1px solid var(--border);
+}
+ 
+.view-card-header h2 {
+  margin: 0;
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--text-main);
+}
+ 
+.header-badge-group {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+ 
+.status-pill {
+  font-size: 0.75rem;
+  font-weight: 600;
+  background-color: var(--border);
+  color: var(--text-main);
+  padding: 0.2rem 0.6rem;
+  border-radius: 12px;
+}
+ 
+.view-card-body {
+  padding: 1.75rem;
+}
+ 
+.task-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin: 0 0 1.25rem 0;
+  color: var(--text-main);
+  line-height: 1.35;
+}
+ 
+.description-block {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+ 
+.block-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+}
+ 
+.description-text {
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: #334155;
+  background-color: var(--bg-color);
+  padding: 1rem 1.2rem;
+  border-radius: 8px;
+  border: 1px solid #f1f5f9;
+  white-space: pre-wrap;
+  margin: 0;
+}
+ 
+.view-card-footer {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 0.8rem;
+  padding: 1.25rem 1.75rem;
+  background-color: var(--bg-color);
+  border-top: 1px solid var(--border);
+}
