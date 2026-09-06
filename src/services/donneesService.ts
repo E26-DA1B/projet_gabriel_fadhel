@@ -72,12 +72,23 @@ export const donneesService = {
       titre: donnees.titre,
       description: donnees.description || '',
       statut: 'À faire',
-      priorite: donnees.priorite || 'Moyenne',
+      priorite: donnees.priorite || 'Basse',
       dateCreation: new Date().toISOString().split('T')[0]
     };
 
     tachesSimulees.push(nouvelleTache);
     return { ...nouvelleTache };
+  },
+
+  async modifierTache(id: number, donnees: DonneesFormulaireTache): Promise<boolean> {
+    const index = tachesSimulees.findIndex(t => t.id === id);
+    if (index === -1) return false;
+
+    tachesSimulees[index] = {
+      ...tachesSimulees[index],
+      ...donnees
+    };
+    return true;
   },
 
   async changerStatut(id: number, nouveauStatut: string): Promise<boolean> {
