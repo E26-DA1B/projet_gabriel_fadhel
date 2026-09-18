@@ -7,4 +7,28 @@ export interface Tache {
   dateCreation: string;
 }
 
-export type DonneesFormulaireTache = Omit<Tache, 'id' | 'statut' | 'dateCreation'>;
+export interface NouvelleTacheDemande {
+  titre: string;
+  description: string;
+  priorite: string;
+}
+
+export interface ModifierTacheDemande {
+  id: number;
+  titre: string;
+  description: string;
+  priorite: string;
+}
+
+export interface DonneesFormulaireTache {
+  titre: string;
+  description: string;
+  priorite: string;
+}
+
+export interface StatistiquesTaches {
+  total: number;
+  aFaire: number;
+  enCours: number;
+  termine: number;
+}
