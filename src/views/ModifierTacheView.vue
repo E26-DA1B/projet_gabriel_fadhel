@@ -41,7 +41,6 @@ const annuler = (): void => {
 <template>
   <section v-if="tache" class="page page-etroit">
     <header>
-      <p class="etiquette">Tâche no {{ tache.id }}</p>
       <h1>Modifier la tâche</h1>
       <p class="texte-secondaire">Mettez à jour les informations nécessaires.</p>
     </header>
