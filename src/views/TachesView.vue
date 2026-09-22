@@ -2,7 +2,7 @@
 import { ref, computed, onMounted } from 'vue';
 import { donneesService } from '../services/donneesService';
 import CarteTache from '../components/CarteTache.vue';
-import type { Tache } from '../types/tache';
+import type { Tache, StatistiquesTaches } from '../types/tache';
 
 interface ZoneElement {
   getBoundingClientRect?: () => { left: number; right: number; top: number; bottom: number; height: number };
@@ -10,6 +10,13 @@ interface ZoneElement {
 
 const taches = ref<Tache[]>([]);
 const colonnes: string[] = ['À faire', 'En cours', 'Terminé'];
+
+const stats = ref<StatistiquesTaches>({
+  total: 0,
+  aFaire: 0,
+  enCours: 0,
+  termine: 0
+});
 
 const recherche = ref<string>('');
 const filtrePriorite = ref<string>('Toutes');
@@ -22,7 +29,12 @@ const fixerRefColonne = (el: unknown, col: string) => {
 };
 
 const charger = async (): Promise<void> => {
-  taches.value = await donneesService.obtenirTaches();
+  const [listeTaches, statsBackend] = await Promise.all([
+    donneesService.obtenirTaches(),
+    donneesService.obtenirStatistiques()
+  ]);
+  taches.value = listeTaches;
+  stats.value = statsBackend;
 };
 
 const deplacerParCoordonnees = async (id: number, x: number, y: number): Promise<void> => {
@@ -47,8 +59,18 @@ const supprimer = async (id: number): Promise<void> => {
   await charger();
 };
 
-const totalTaches = computed<number>(() => taches.value.length);
-const compteParStatut = (statut: string): number => taches.value.filter(t => t.statut === statut).length;
+const obtenirValeurStat = (colonne: string): number => {
+  switch (colonne) {
+    case 'À faire':
+      return stats.value.aFaire;
+    case 'En cours':
+      return stats.value.enCours;
+    case 'Terminé':
+      return stats.value.termine;
+    default:
+      return 0;
+  }
+};
 
 const tachesFiltreesEtTriees = computed<Tache[]>(() => {
   let resultat = [...taches.value];
@@ -101,11 +123,11 @@ onMounted(charger);
 
     <div class="stats-bar">
       <div class="stat-card">
-        <span class="stat-value">{{ totalTaches }}</span>
+        <span class="stat-value">{{ stats.total }}</span>
         <span class="stat-label">Total Tâches</span>
       </div>
       <div class="stat-card" v-for="col in colonnes" :key="col">
-        <span class="stat-value">{{ compteParStatut(col) }}</span>
+        <span class="stat-value">{{ obtenirValeurStat(col) }}</span>
         <span class="stat-label">{{ col }}</span>
       </div>
     </div>

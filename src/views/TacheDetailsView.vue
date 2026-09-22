@@ -9,9 +9,9 @@ const router = useRouter();
 const tache = ref<Tache | null>(null);
 
 onMounted(async () => {
-  const taches = await donneesService.obtenirTaches();
   const idTache = Number(route.params.id);
-  const trouvee = taches.find(t => t.id === idTache);
+  
+  const trouvee = await donneesService.obtenirTacheParId(idTache);
 
   if (trouvee) {
     tache.value = trouvee;
