@@ -9,15 +9,23 @@ const route = useRoute();
 const router = useRouter();
 
 const tache = ref<Tache | null>(null);
+const estEnChargement = ref<boolean>(true);
+const erreur = ref<string>('');
 
 onMounted(async () => {
   const idTache = Number(route.params.id);
-  const trouvee = await donneesService.obtenirTacheParId(idTache);
-
-  if (trouvee) {
-    tache.value = trouvee;
-  } else {
-    router.push('/taches');
+  
+  try {
+    const trouvee = await donneesService.obtenirTacheParId(idTache);
+    if (trouvee) {
+      tache.value = trouvee;
+    } else {
+      erreur.value = "La tâche demandée n'existe pas.";
+    }
+  } catch {
+    erreur.value = "Impossible de charger la tâche depuis le serveur.";
+  } finally {
+    estEnChargement.value = false;
   }
 });
 
@@ -25,7 +33,6 @@ const enregistrer = async (donnees: DonneesFormulaireTache): Promise<void> => {
   if (!tache.value) return;
 
   await donneesService.modifierTache(tache.value.id, donnees);
-  
   router.push(`/taches/${tache.value.id}`);
 };
 
@@ -39,7 +46,21 @@ const annuler = (): void => {
 </script>
 
 <template>
-  <section v-if="tache" class="page page-etroit">
+
+  <div v-if="estEnChargement" class="page page-etroit">
+    <p>Chargement de la tâche en cours...</p>
+  </div>
+
+  <section v-else-if="erreur" class="page page-etroit etat-vide">
+    <span class="code-erreur">404</span>
+    <h1>Tâche introuvable</h1>
+    <p>{{ erreur }}</p>
+    <RouterLink class="bouton bouton-principal" to="/taches">
+      Retour au tableau
+    </RouterLink>
+  </section>
+
+  <section v-else-if="tache" class="page page-etroit">
     <header>
       <h1>Modifier la tâche</h1>
       <p class="texte-secondaire">Mettez à jour les informations nécessaires.</p>
@@ -55,14 +76,5 @@ const annuler = (): void => {
       @soumettre="enregistrer" 
       @annuler="annuler" 
     />
-  </section>
-
-  <section v-else class="page page-etroit etat-vide">
-    <span class="code-erreur">404</span>
-    <h1>Tâche introuvable</h1>
-    <p>Impossible de modifier une tâche qui n'existe pas.</p>
-    <RouterLink class="bouton bouton-principal" to="/taches">
-      Retour au tableau
-    </RouterLink>
   </section>
 </template>
