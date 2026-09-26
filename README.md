@@ -10,7 +10,7 @@
   - Fadhel Smari
   - Gabriel Cadieux
 * **Dépôt GitHub :** https://github.com/E26-DA1B/projet_gabriel_fadhel
-* **Version de la remise :** TP2 (`tag: tp2`)
+* **Version de la remise :** TP2 (`tag: tp3`)
 
 ---
 
@@ -20,50 +20,57 @@ Dans le cadre d'un projet académique ou personnel, la gestion du temps et l'ord
 
 ---
 
-## Fonctionnalités principales (TP2 — Version Frontend)
+## Principales fonctionnalités (TP3 — Version Backend & Frontend finale)
 
-### 1. Tableau de tâches interactif avec glisser-déposer (*Drag-and-Drop*)
-* **Organisation visuelle :** Présentation des tâches en 3 colonnes de statut distinctes (*À faire*, *En cours*, *Terminée*).
-* **Cartes interactives :** Chaque tâche est représentée par une carte incluant titre, description écourtée, badge de priorité et date de création.
-* **Glisser-déposer fluide :** Déplacement direct et intuitif des cartes entre les colonnes avec réorganisation automatique de l'état des tâches.
+### 1. Backend Rust performant & Commandes Tauri
+* **Architecture modulaire :** Séparation claire des responsabilités côté backend avec des modules Rust dédiés (`modeles.rs`, `base_donnees.rs`, `commandes.rs`, `lib.rs`).
+* **Communication frontend-backend :** Exposé des opérations backend au frontend Vue 3 via des commandes Tauri asynchrones (`#[tauri::command(async)]`).
+* **Gestion robuste des erreurs :** Traitement des exceptions avec le type `Result<T, String>` de Rust, garantissant qu'aucune erreur système ne fait planter l'application et qu'un message explicite est retourné au frontend.
 
-### 2. Statistiques dynamiques et calculées en temps réel
-* **Indicateurs clés de performance :** Calcul automatique et instantané du nombre total de tâches, du nombre de tâches à faire, en cours et terminées.
-* **Mise à jour en direct :** Le tableau de bord ajuste ses métriques à chaque fois qu'une tâche est ajoutée, modifiée, supprimée ou déplacée d'une colonne à une autre.
+### 2. Persistance locale des données (JSON)
+* **Sauvegarde automatique :** Enregistrement de l'état des tâches dans un fichier JSON (`taches.json`) stocké de façon sécurisée dans le dossier de données utilisateur de l'application (`app_data_dir`).
+* **Persistance entre les sessions :** Conservation intégrale des ajouts, modifications, changements de statut et suppressions après la fermeture et le redémarrage de l'application.
+* **Génération dynamique des identifiants :** Attribution automatique d'un ID unique en millisecondes (`UNIX_EPOCH`) et horodatage automatique de la date de création avec la bibliothèque `chrono`.
 
-### 3. Recherche, filtrage et tri poussés
-* **Recherche textuelle :** Filtrage instantané des cartes selon les termes saisis dans la barre de recherche.
-* **Filtres par priorité :** Possibilité d'isoler les tâches selon leur niveau (*Basse*, *Moyenne*, *Haute*).
-* **Tri dynamique :** Ordonnancement par date de création ou par niveau de priorité.
+### 3. Tableau Kanban interactif avec glisser-déposer (*Drag-and-Drop*)
+* **Organisation visuelle :** Présentation des tâches réparties en 3 colonnes de statut distinctes (*À faire*, *En cours*, *Terminé*).
+* **Déplacement fluide :** Glisser-déposer interactif des cartes modifiant directement le statut de la tâche en backend via la commande `changer_statut`.
+* **Cartes informatives :** Affichage du titre, de la description, du badge de priorité (*Basse*, *Moyenne*, *Haute*) et de la date de création.
 
-### 4. Navigation fluide & Vues distinctes
-L'application intègre **3 vues principales** gérées par Vue Router :
-1. **Accueil / Tableau de bord (`/`) :** Présentation de l'application et accès rapide aux fonctionnalités.
-2. **Tableau des tâches (`/taches`) :** Vue Kanban principale avec cartes glissables, recherche et barre de statistiques.
-3. **Formulaire de création (`/taches/nouvelle`) & modification (`/taches/:id/modifier`) :** Interfaces épurées pour ajouter ou mettre à jour les détails d'une tâche.
+### 4. Traitement backend & Statistiques calculées en temps réel
+* **Agrégation côté Rust :** Calcul dynamique du nombre total de tâches ainsi que du décompte par statut (*À faire*, *En cours*, *Terminé*) effectué directement dans le backend Rust via `obtenir_statistiques`.
+* **Mise à jour en direct :** Ajustement instantané des indicateurs du tableau de bord après chaque opération CRUD ou changement d'état.
 
-### 5. Formulaire complet et validation stricte
-* **Contrôle des saisies :** Validation côté client (longueur minimale du titre, sélection requise de la priorité).
-* **Messages d'erreur contextuels :** Alertes visuelles explicites en cas de saisie invalide ou d'échec d'opération.
-* **Confirmation et retour :** Retour d'information immédiat lors de la confirmation ou de la suppression d'une tâche.
+### 5. Recherche, filtrage et tri dynamiques
+* **Recherche textuelle :** Filtrage instantané sur les titres et descriptions des tâches.
+* **Filtre par priorité :** Isolation des tâches selon leur niveau de priorité.
+* **Tri multi-critères :** Ordonnancement chronologique (plus récente / plus ancienne) ou par niveau de priorité (Haute → Basse ou Basse → Haute).
+
+### 6. Navigation complète & Validation des formulaires
+* **Navigation multi-vues :** Navigation fluide gérée par Vue Router (Accueil, Tableau Kanban, Formulaire de création, Vue détaillée, Formulaire de modification, Page 404).
+* **Double validation :** Validation préventive des champs côté client (longueur du titre, sélection de priorité) couplée à la validation et sérialisation/désérialisation stricte par Serde côté Rust.
 
 ---
 
 ## Technologies utilisées
 
-* **Framework Frontend :** [Vue 3](https://vuejs.org/) (Composition API avec `<script setup lang="ts">`)
-* **Framework Desktop :** [Tauri 2](https://v2.tauri.app/)
-* **Langage & Outillage :** TypeScript, HTML5, CSS3
-* **Routage :** Vue Router
-* **Gestionnaire de paquets :** npm
+## Technologies utilisées
 
----
+* **Backend Rust & Intégration Desktop :**
+  * **Rust** — Langage système performant et sécurisé utilisé pour la logique métier et la gestion des données.
+  * **Tauri** — Framework de bureau léger assurant l'encapsulation de l'application et la communication inter-processus via `invoke`.
+  * **Serde** (`serde` / `serde_json`) — Sérialisation et désérialisation des structures Rust pour les échanges JSON avec le frontend.
+  * **Chrono** — Gestion des horodatages et formatage des dates de création des tâches.
 
-## Architecture des données & Services
+* **Frontend Vue 3 :**
+  * **Vue 3** — Framework réactif utilisant la Composition API (`<script setup lang="ts">`).
+  * **TypeScript** — Typage statique strict garantissant la fiabilité du code.
+  * **Vue Router 4** — Gestion du routage et de la navigation monopage (SPA).
+  * **HTML5 & CSS3** — Interface utilisateur fluide, responsive et sans dépendances lourdes.
 
-Pendant cette phase du TP2, les données sont simulées et gérées par une couche de service JavaScript/TypeScript isolée (`src/services/donneesService.ts`). 
-
-Cette architecture garantit la séparation des responsabilités : les composants Vue n'interagissent pas directement avec la mémoire globale, mais passent exclusivement par le service. Cette couche préparatoire simplifiera l'intégration du backend Rust et des commandes Tauri lors du TP3.
+* **Outillage & Gestionnaire de paquets :**
+  * **npm** — Gestionnaire de dépendances JavaScript/Node.js.
+  * **Cargo** — Gestionnaire de paquets et outil de compilation pour Rust.
 
 ---
 
@@ -103,25 +110,39 @@ Avant de pouvoir exécuter le projet, assurez-vous d'avoir installé sur votre m
    npm run tauri dev
    ```
 
-## Répartition du travail (TP2)
+---
+
+## Persistance des données (TP3)
+
+Le stockage local s'appuie sur un fichier au format **JSON** nommé `taches.json`, géré par le backend Rust. Le fichier est automatiquement créé et conservé sur le disque dans le dossier de données propre à l'application (`app_data_dir`), garantissant la persistance des tâches et des statistiques après chaque fermeture.
+
+---
+
+## Répartition du travail (TP3 — Backend & Intégration)
 
 ### Fadhel Smari
-* **Configuration & Structure :** Initialisation du projet (Vue 3, TypeScript, Tauri v2), configuration de Vite et mise en place du dépôt GitHub.
-* **Typage & Modélisation :** Création du type utilitaire `DonneesFormulaireTache` dans `types/tache.ts`.
-* **Services & Logique Métier :** Implémentation des méthodes CRUD avancées et du calcul dynamique des statistiques dans `services/donneesService.ts`.
-* **Composants & Vues :** Développement de `CarteTache.vue`, `TachesView.vue` (tableau Tâches, recherche, tri, filtres, stats), `ModifierTacheView.vue` et `PageIntrouvableView.vue`.
-* **Routage :** Configuration des routes pour le tableau, la modification et la page d'erreur dans `router/index.ts`.
-* **Styles CSS :** Intégration du style visuel pour `CarteTache` et le tableau `TachesView`.
+* **Persistance des données (`base_donnees.rs`) :** Implémentation de la lecture/écriture JSON et de la gestion CRUD persistante.
+* **Calcul des statistiques :** Implémentation du calcul dynamique des métriques (`total`, `a_faire`, `en_cours`, `termine`) côté Rust.
+* **Gestion des dates :** Intégration de la dépendance `chrono` pour l'horodatage automatique lors de la création d'une tâche.
+* **Typage TypeScript & Interfaces :** Définition des structures de formulaires(`DonneesFormulaireTache`), des requêtes backend (`NouvelleTacheDemande`, `ModifierTacheDemande`) et des métriques (`StatistiquesTaches`).
+* **Liaison Frontend-Backend (`donneesService.ts`) :** Remplacement des données simulées par l'intégration des appels Tauri `invoke()`.
 
 ### Gabriel Cadieux
-* **Modélisation de Données :** Définition de l'interface principale `Tache` dans `types/tache.ts`.
-* **Services & Données Initiales :** Mise en place du jeu de données fictif (6 tâches) et des méthodes `obtenirTaches` et `obtenirTacheParId` dans `services/donneesService.ts`.
-* **Composants & Vues :** Développement des composants `NavigationPrincipale.vue` et `FormulaireTache.vue`, ainsi que des vues `AccueilView.vue`, `TacheDetailsView.vue` et `NouvelleTacheView.vue`.
-* **Routage :** Définition des routes d'accueil, de détail et de création dans `router/index.ts`.
-* **Intégration & Démarrage :** Assemblage de la navigation principale dans `App.vue` et initialisation globale de l'application (Vue, Vue Router, styles) dans `main.ts`.
-* **Styles CSS :**  Intégration du style visuel pour les formulaires, la barre de navigation, la vue d'accueil et la vue détaillée.
+* **Modèles de données (`modeles.rs`) :** Définition des structures Rust avec sérialisation et désérialisation `serde` en `camelCase`.
+* **Exposition des commandes (`commandes.rs`) :** Création des fonctions asynchrones exposées au frontend via `#[tauri::command(async)]`.
+* **Point d'entrée backend (`lib.rs` / `main.rs`) :** Structuration de l'architecture modulaire et enregistrement des handlers Tauri.
+* **Intégration du service asynchrone :** Mise à jour de la récupération directe des tâches et détails dans les vues de consultation.
+* **Affichage des statistiques backend :** Adaptation de la barre de métriques de `TachesView` pour consommer les données calculées par Rust.
+
+---
 
 ## Limites et fonctionnalités incomplètes connues
 
-* **Persistance des données temporaire :** Les données sont stockées uniquement en mémoire (RAM) via le service de simulation. Un redémarrage ou un rafraîchissement complet de l'application réinitialise les tâches à leur état par défaut.
-* **Absence de base de données :** Le projet n'intègre pas encore de base de données (comme SQLite) pour enregistrer les modifications sur le disque dur de l'utilisateur.
+* **Statut et stabilité de l'application :** L'application est pleinement fonctionnelle, stable et ne présente aucun bug connu. Elle répond à l'ensemble des exigences du cahier des charges du TP3.
+* **Gestion des erreurs et exceptions :** La gestion des erreurs est assurée côté backend Rust sur l'ensemble des opérations. Le frontend Vue effectue quant à lui la validation en amont des données saisies, garantissant ainsi une expérience utilisateur fluide sans plantage inattendu.
+
+### Pistes d'améliorations futures
+Si l'application venait à évoluer dans de futures versions, les ajouts suivants pourraient être envisagés :
+* **Migration vers une base de données relationnelle :** Remplacer le stockage par fichier `taches.json` par une base de données intégrée comme **SQLite** afin d'optimiser les performances lors de la gestion d'un volume massif de tâches.
+* **Historique des activités :** Ajouter un journal d'historique permettant de consulter l'ensemble des actions effectuées (création, modifications, changements de statut, suppressions) avec leurs dates et heures précises.
+* **Sous-tâches et étiquettes personnalisées :** Offrir la possibilité d'ajouter des étiquettes (*tags*) personnalisées et de découper une tâche principale en sous-tâches (checklists).

@@ -20,7 +20,8 @@
 
 ## 3. Données principales
 
-Une tâche possède un identifiant unique, un titre, une description facultative, un statut (*À faire*, *En cours*, *Terminée*), un niveau de priorité (*Basse*, *Moyenne*, *Haute*) et une date de création.
+Une tâche possède un identifiant unique, un titre, une description facultative, un statut (*À faire*, *En cours*, *Terminée*), un niveau de priorité (*Basse*, *Moyenne*, *Haute*) et une date de création
+générée automatiquement.
 
 ## 4. États ou catégories
 
@@ -76,7 +77,7 @@ La barre de navigation est présente de manière permanente en haut de chaque é
 
 ### Écran 4 : Modification d'une tâche (`/taches/:id/modifier`)
 - **Ce que la personne verra :**
-  - Un en-tête identifiant la tâche à modifier (ex. Tâche no X).
+  - Un en-tête de section clair indiquant la modification d'une tâche.
   - Le formulaire prérempli avec le titre, la priorité et la description actuels de la tâche.
   - Les boutons de sauvegarde et d'annulation.
 - **Les actions qu'elle pourra effectuer :**
@@ -102,23 +103,23 @@ La barre de navigation est présente de manière permanente en haut de chaque é
 |---|---|---|
 | Barre de recherche | Filtrer la liste des cartes selon le terme recherché | Tâches |
 | Filtres et options de tri | Filtrer par priorité et ordonner par date ou priorité | Tâches |
-| Barre de statistiques | Calculer en temps réel le nombre total et le compte par statut | Statistiques des tâches |
-| Tableau interactif et cartes | Gérer le glisser-déposer (*drag-and-drop*) et le changement de statut | Tâches, Statut |
-| Formulaire d'ajout / modification | Vérifier que le titre comporte au moins 2 caractères et valider la priorité sélectionnée | Champs de la tâche |
-| Bouton d'enregistrement | Confirmer la création ou la modification d'une tâche | Données du formulaire |
+| Barre de statistiques | Calculer en temps réel le total et le compte par statut côté Rust | Statistiques des tâches |
+| Tableau interactif et cartes | Gérer le glisser-déposer (*drag-and-drop*) et persister le nouveau statut | Tâches, Statut |
+| Formulaire d'ajout / modification | Valider que le titre comporte au moins 2 caractères côté client et sérialiser côté backend | Champs de la tâche |
+| Bouton d'enregistrement | Confirmer la création ou la modification d'une tâche via commande Tauri | Données du formulaire |
 | Bouton d'annulation | Annuler la saisie et rediriger vers le tableau | N/A |
-| Bouton de suppression | Retirer définitivement une tâche de la collection | Tâche sélectionnée |
+| Bouton de suppression | Retirer définitivement une tâche du stockage JSON | Tâche sélectionnée |
 
 ---
 
-## 7. Limites de la première version
+## 7. Limites de l'application
 
 1. **Persistance multi-utilisateurs et comptes :** L'application ne gère pas la création de comptes d'utilisateurs ni l'authentification à distance ; elle fonctionne exclusivement en local sur la machine.
 2. **Historique des modifications :** Aucun suivi historique détaillé ni journal des changements d'état (*activity log*) n'est conservé pour les tâches.
 
 ---
 
-## Bilan du Frontend TP2
+## 8. Bilan du Frontend (TP2)
 
 - **Vues réellement créées :**
   - Vue Accueil (`/` - `AccueilView.vue`)
@@ -137,3 +138,30 @@ La barre de navigation est présente de manière permanente en haut de chaque é
   - `changerStatut(id, nouveauStatut)` : Met à jour la colonne de statut lors d'une action de glisser-déposer.
   - `supprimerTache(id)` : Retire une tâche du tableau simulé.
   - `obtenirResume()` : Calcule le total, le nombre de tâches par statut et le taux de complétion global.
+  
+---
+
+## 9. Bilan du Backend et Architecture Finale (TP3)
+
+### Structure des modules Rust (`src-tauri/src/`)
+- **`modeles.rs` :** Contient la structure `Tache`, l'énumération `Statut`, la structure `StatistiquesTaches` ainsi que les DTOs pour l'ajout et la modification (`NouvelleTacheDemande`, `ModifierTacheDemande`). Utilise `serde` pour la sérialisation/désérialisation JSON en `camelCase`.
+- **`base_donnees.rs` :** Encapsule l'accès aux données persistantes. Gère le fichier local `taches.json` situé dans le dossier de données de l'application (`app_data_dir`). Fournit les opérations CRUD thread-safe (utilisant des verrous `Mutex`) et le calcul des statistiques.
+- **`commandes.rs` :** Définit l'ensemble des commandes Tauri asynchrones (`#[tauri::command(async)]`) exposées au frontend.
+- **`lib.rs` :** Configure le point d'entrée de l'application Tauri, initialise l'environnement et enregistre l'ensemble des commandes Tauri.
+- **`main.rs` :** Lance l'exécution de l'application de bureau en appelant la fonction de démarrage de la bibliothèque (`lib.rs`).
+
+### Commandes Tauri implémentées
+- `lister_taches` : Extrait et retourne la liste complète des tâches stockées depuis le fichier JSON local.
+- `ajouter_tache` : Valide la demande, génère un ID unique et un horodatage via `chrono`, puis sauvegarde la nouvelle tâche.
+- `modifier_tache` : Recherche la tâche par son ID dans le stockage et applique les modifications.
+- `changer_statut` : Recherche la tâche par son ID et met à jour son statut lors d'un glisser-déposer.
+- `supprimer_tache` : Supprime définitivement une tâche du stockage local selon son ID.
+- `obtenir_statistiques` : Calcule et retourne l'agrégation globale (`total`, `a_faire`, `en_cours`, `termine`).
+
+### Mécanisme de persistance
+Le stockage local s'appuie sur un fichier JSON (`taches.json`) géré nativement en Rust. Ce choix garantit un déploiement léger sans dépendances externes lourdes, tout en conservant l'intégralité des données après la fermeture de l'application.
+
+### Différences entre l'architecture prévue et l'architecture finale
+- **Centralisation des statistiques :** Le calcul du résumé des statistiques a été déplacé du frontend vers le backend Rust (`obtenir_statistiques`) afin de garantir une source unique de vérité et d'alléger la charge de calcul de l'interface Vue.
+- **Horodatage automatique :** L'attribution des dates et la génération d'identifiants uniques sont intégralement gérées par le backend Rust lors de la création d'une tâche via la bibliothèque `chrono`.
+- **Services asynchrones :** La couche frontend `donneesService.ts` a été intégralement convertie en méthodes asynchrones (`async`/`await`) pour s'aligner sur les appels inter-processus `invoke` de Tauri.
